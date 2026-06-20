@@ -6,6 +6,8 @@ export default function Orders(){
   const [customers, setCustomers] = React.useState([])
   const [products, setProducts] = React.useState([])
   const [form, setForm] = React.useState({customer_id:'', items:[]})
+  const [errors, setErrors] = React.useState([])
+  const [message, setMessage] = React.useState('')
 
   React.useEffect(()=>{fetchAll()},[])
   function fetchAll(){
@@ -26,15 +28,33 @@ export default function Orders(){
 
   function create(e){
     e.preventDefault()
-    // coerce types
-    const payload = {customer_id: parseInt(form.customer_id), items: form.items.map(i=>({product_id: parseInt(i.product_id), quantity: parseInt(i.quantity)}))}
-    api.orders.create(payload).then(()=>{setForm({customer_id:'', items:[]});fetchAll()}).catch(err=>alert(err.response?.data?.detail||err.message))
+    setMessage('')
+    setErrors([])
+    // validation
+    const errs = []
+    if(!form.customer_id) errs.push('Please select a customer')
+    if(!form.items.length) errs.push('Add at least one item')
+    const itemsPayload = []
+    form.items.forEach((it, idx)=>{
+      const pid = parseInt(it.product_id)
+      const qty = parseInt(it.quantity)
+      if(!pid) errs.push(`Select product for item ${idx+1}`)
+      if(Number.isNaN(qty) || qty <= 0) errs.push(`Quantity must be > 0 for item ${idx+1}`)
+      const prod = products.find(p=>p.id === pid)
+      if(prod && qty > prod.quantity) errs.push(`Insufficient stock for ${prod.name} (available ${prod.quantity})`)
+      itemsPayload.push({product_id: pid, quantity: qty})
+    })
+    if(errs.length){ setErrors(errs); return }
+    const payload = {customer_id: parseInt(form.customer_id), items: itemsPayload}
+    api.orders.create(payload).then(()=>{setForm({customer_id:'', items:[]});fetchAll(); setMessage('Order created')}).catch(err=>setErrors([err.response?.data?.detail||err.message]))
   }
 
   return (
     <div>
       <h2>Orders</h2>
       <form onSubmit={create} className="card">
+        {message && <div style={{color:'green'}}>{message}</div>}
+        {errors.length > 0 && <div style={{color:'red'}}>{errors.map((e,i)=><div key={i}>{e}</div>)}</div>}
         <select value={form.customer_id} onChange={e=>setForm({...form, customer_id:e.target.value})}>
           <option value="">Select customer</option>
           {customers.map(c=> <option value={c.id} key={c.id}>{c.full_name}</option>)}
