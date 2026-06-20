@@ -28,15 +28,9 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup():
-    # In development this will create tables automatically, but in production
-    # prefer using Alembic migrations. To create the DB schema with Alembic:
-    #   alembic -c alembic.ini revision --autogenerate -m "init"
-    #   alembic -c alembic.ini upgrade head
-    try:
-        models.Base.metadata.create_all(bind=engine)
-    except Exception:
-        # if DB isn't available on startup, continue; migrations should be applied separately
-        pass
+    # Rely on Alembic migrations to manage the schema. Do not create tables here
+    # to avoid conflicts when migrations are applied at container startup.
+    return
 
 
 @app.get("/")

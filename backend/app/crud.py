@@ -44,6 +44,10 @@ def delete_product(db: Session, product_id: int):
     product = get_product(db, product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
+    # Check for existing order items referencing this product
+    ref = db.query(models.OrderItem).filter(models.OrderItem.product_id == product_id).first()
+    if ref:
+        raise HTTPException(status_code=400, detail="Cannot delete product: it is referenced by existing orders")
     db.delete(product)
     db.commit()
     return True
