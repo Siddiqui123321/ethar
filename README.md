@@ -5,9 +5,9 @@ Short description: Full-stack Inventory & Order Management app (FastAPI backend,
 ## Public links (fill these before submission)
 
 - GitHub repo: <your-github-repo-url>
-- Docker Hub backend image: https://hub.docker.com/r/<DOCKERHUB_USERNAME>/<IMAGE_NAME>
-- Live backend URL: <https://your-backend.example.com>
-- Live frontend URL: <https://your-frontend.example.com>
+- Docker Hub backend image: https://hub.docker.com/r/hamzasiddiqui123321/inventory-backend
+- Live backend URL: https://inventory-backend-production-aeae.up.railway.app
+- Live frontend URL: https://ethar-khaki.vercel.app/
 
 ## How to run locally (Docker Compose)
 
